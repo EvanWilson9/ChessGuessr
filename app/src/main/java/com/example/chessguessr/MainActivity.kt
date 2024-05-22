@@ -127,7 +127,7 @@ fun DisplayCoordinate(coordinate : String){
 
 @Composable
 fun CoordinateandSquareColor(){
-
+    //TODO Fix this
     val currentCoordinate = remember { mutableStateOf(getCoordinate()) }
 
     Coordinate{ _,color ->
