@@ -38,6 +38,7 @@ import androidx.compose.ui.window.Dialog
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
+    val guessrVM: GuessrViewModel = GuessrViewModel()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -66,57 +67,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun getCoordinate(): String {
-    val randomNumber = Random.nextInt(63)
-    var coordinate = ""
-    val coordinates = arrayOf(
-        "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8",
-        "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8",
-        "c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8",
-        "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8",
-        "e1", "e2", "e3", "e4", "e5", "e6", "e7", "e8",
-        "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8",
-        "g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8",
-        "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8"
-    )
-
-    coordinate = coordinates[randomNumber]
-    return coordinate
-}
-
-fun getSquareColor(coordinate: String) : String{
-    var squareColor = ""
-    val lightSquares = setOf(
-        "a2", "a4", "a6", "a8",
-        "b1", "b3", "b5", "b7",
-        "c2", "c4", "c6", "c8",
-        "d1", "d3", "d5", "d7",
-        "e2", "e4", "e6", "e8",
-        "f1", "f3", "f5", "f7",
-        "g2", "g4", "g6", "g8",
-        "h1", "h3", "h5", "h7"
-    )
-
-    if (coordinate in lightSquares) {
-        squareColor = "Light"
-    } else {
-        squareColor = "Dark"
-    }
-
-    println(squareColor + " " + "Sep")
-    return squareColor
-}
-
-@Composable
-fun Coordinate(content: @Composable (String, String) -> Unit){
-
-    val coord = remember { mutableStateOf(getCoordinate()) }
-    val squareColor = remember { mutableStateOf(getSquareColor(coord.value))}
-
-    content(coord.value,squareColor.value)
-
-}
-
 @Composable
 fun DisplayCoordinate(coordinate : String){
     Text(
@@ -126,27 +76,13 @@ fun DisplayCoordinate(coordinate : String){
 }
 
 @Composable
-fun CoordinateandSquareColor(){
+fun CoordinateandSquareColor(guessrVM: GuessrViewModel){
     //TODO Fix this
-    val currentCoordinate = remember { mutableStateOf(getCoordinate()) }
+//    val currentCoordinate = remember { mutableStateOf(getCoordinate()) }
 
-    Coordinate{ _,color ->
-        DisplayCoordinate(currentCoordinate.value)
-        Spacer(modifier = Modifier.padding(60.dp))
-        Choices(color) {isCorrect ->
-            if (isCorrect) {
-                currentCoordinate.value = getCoordinate()
-            }
-        }
-    }
 }
 
-fun checkChoice(choice : String, color : String) : Boolean{
-    if (choice == color){
-        return true
-    }
-    return false
-}
+
 
 
 @Composable
@@ -168,7 +104,6 @@ fun Score() {
         )
     }
 }
-
 @Composable
 fun Hint(){
     val openDialog = remember{ mutableStateOf(false) }
@@ -211,16 +146,15 @@ fun Hint(){
 }
 
 @Composable
-fun Choices(color: String, onChoiceMade : (Boolean) -> Unit) {
-
-    val correctChoice = remember { mutableStateOf(false) }
+fun Choices(guessrVM : GuessrViewModel, color: String, onChoiceMade : (Boolean) -> Unit) {
+    //Todo
 
     Box() {
         Column {
             OutlinedButton(
                 onClick = {
-                    correctChoice.value = checkChoice("Light", color)
-                    onChoiceMade(correctChoice.value) },
+                    onChoiceMade(guessrVM.checkChoice("Light", color))
+                          },
                 border = BorderStroke(1.5.dp, Color.Black),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
@@ -241,7 +175,7 @@ fun Choices(color: String, onChoiceMade : (Boolean) -> Unit) {
 
             Button(
                 onClick = {
-                    correctChoice.value = checkChoice("Dark", color)
+                    correctChoice.value = guessrVM.checkChoice("Dark", color)
                     onChoiceMade(correctChoice.value)},
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Black,
