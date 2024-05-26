@@ -3,6 +3,7 @@ package com.example.chessguessr
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,6 +20,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,9 +60,9 @@ class MainActivity : ComponentActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally,
 //                    verticalArrangement = Arrangement.SpaceEvenly,
                 ){
-                    Score()
+                    Score(guessrVM)
                     Spacer(modifier = Modifier.padding(70.dp))
-                    CoordinateandSquareColor()
+                    DisplayCoordinateandGetColor(guessrVM)
                 }
             }
             Hint()
@@ -76,19 +79,40 @@ fun DisplayCoordinate(coordinate : String){
 }
 
 @Composable
-fun CoordinateandSquareColor(guessrVM: GuessrViewModel){
-    //TODO Fix this
-//    val currentCoordinate = remember { mutableStateOf(getCoordinate()) }
+fun DisplayCoordinateandGetColor(guessrVM: GuessrViewModel){
+    LaunchedEffect(key1 = true ) {
+        guessrVM.coord = guessrVM.getCoordinate()
+    }
+    DisplayCoordinate(guessrVM.coord)
+    Spacer(modifier = Modifier.padding(70.dp))
+    Choices(
+        guessrVM = GuessrViewModel(),
+        color = guessrVM.getSquareColor(guessrVM.coord),
+        lightChoice = {
+            val outcome = guessrVM.checkChoice("Light", guessrVM.getSquareColor(guessrVM.coord))
+            if (outcome) {
+                guessrVM.coord = guessrVM.getCoordinate()
+                guessrVM.updateCorrect()
+            } else {
+                guessrVM.coord = guessrVM.getCoordinate()
+                guessrVM.updateWrong()
+            }
+    },
+        darkChoice = {
+            val outcome = guessrVM.checkChoice("Dark", guessrVM.getSquareColor(guessrVM.coord))
+            if (outcome) {
+                guessrVM.coord = guessrVM.getCoordinate()
+                guessrVM.updateCorrect()
+            } else {
+                guessrVM.coord = guessrVM.getCoordinate()
+                guessrVM.updateWrong()
 
+            }
+        })
 }
 
-
-
-
 @Composable
-fun Score() {
-    var won = 0
-    var total = 0
+fun Score(guessrVM: GuessrViewModel) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -97,13 +121,14 @@ fun Score() {
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "$won / $total",
+            text = "${guessrVM.correctScore} / ${guessrVM.totalScore}",
             fontSize = 30.sp,
             color = Color.White,
             fontWeight = FontWeight.Bold
         )
     }
 }
+
 @Composable
 fun Hint(){
     val openDialog = remember{ mutableStateOf(false) }
@@ -146,15 +171,12 @@ fun Hint(){
 }
 
 @Composable
-fun Choices(guessrVM : GuessrViewModel, color: String, onChoiceMade : (Boolean) -> Unit) {
-    //Todo
+fun Choices(guessrVM : GuessrViewModel, color: String, lightChoice : ()-> Unit, darkChoice : ()-> Unit) {
 
     Box() {
         Column {
             OutlinedButton(
-                onClick = {
-                    onChoiceMade(guessrVM.checkChoice("Light", color))
-                          },
+                onClick = lightChoice,
                 border = BorderStroke(1.5.dp, Color.Black),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White,
@@ -174,10 +196,8 @@ fun Choices(guessrVM : GuessrViewModel, color: String, onChoiceMade : (Boolean) 
             Spacer(modifier = Modifier.padding(8.dp))
 
             Button(
-                onClick = {
-                    correctChoice.value = guessrVM.checkChoice("Dark", color)
-                    onChoiceMade(correctChoice.value)},
-                colors = ButtonDefaults.buttonColors(
+                onClick = darkChoice,
+                    colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Black,
                     contentColor = Color.White
                 ),

@@ -1,16 +1,19 @@
 package com.example.chessguessr
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import kotlin.random.Random
 
 class GuessrViewModel : ViewModel() {
 
-    val coord : String by mutableStateOf("")
-    val squareColor by mutableStateOf("")
-    val correctChoice by mutableStateOf(false)
+    var coord : String by mutableStateOf("")
+    val squareColor : String by mutableStateOf("")
+    var totalScore : Int by mutableIntStateOf(0)
+    var correctScore : Int by mutableIntStateOf(0)
 
     fun checkChoice(choice : String, color : String) : Boolean{
         if (choice == color){
@@ -18,8 +21,18 @@ class GuessrViewModel : ViewModel() {
         }
         return false
     }
+
+    fun updateWrong(){
+        totalScore+=1
+    }
+
+    fun updateCorrect(){
+        correctScore+=1
+        totalScore+=1
+    }
+
     fun getCoordinate(): String {
-        val randomNumber = Random.nextInt(63)
+        val randomNumber = Random.nextInt(0,63)
         var coordinate = ""
         val coordinates = arrayOf(
             "a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8",
@@ -35,6 +48,7 @@ class GuessrViewModel : ViewModel() {
         coordinate = coordinates[randomNumber]
         return coordinate
     }
+
     fun getSquareColor(coordinate: String) : String{
         var squareColor = ""
         val lightSquares = setOf(
@@ -54,7 +68,6 @@ class GuessrViewModel : ViewModel() {
             squareColor = "Dark"
         }
 
-        println(squareColor + " " + "Sep")
         return squareColor
     }
 }
