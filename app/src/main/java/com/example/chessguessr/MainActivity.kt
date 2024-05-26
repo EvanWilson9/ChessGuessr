@@ -41,7 +41,7 @@ import androidx.compose.ui.window.Dialog
 import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
-    val guessrVM: GuessrViewModel = GuessrViewModel()
+    val guessrVM : GuessrViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
